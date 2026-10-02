@@ -20,7 +20,7 @@ does anything in the agent's output warn us?
   random draw from a secret seed, never printed them, then encrypted code, seed and truth.
 - Runner: <name>. Ran the agent cold on one dataset per scenario.
 - Auditor: <name>. Reads the transcripts and scores the diagnostics.
-- Deviation to disclose: <e.g. one person played all three roles; separation was enforced by
+- Deviation to disclose: <e.g. separation was enforced by
   separate Claude sessions, separate folders and encrypted truth>.
 
 ## Simulation (what the agent was NOT told)
@@ -51,27 +51,40 @@ For the run on the broken scenario, did the agent, without being asked:
 Score each 0 / 1. Then compare with what it said when asked "what assumptions are you relying on?"
 
 ## Results (fill in after the reveal)
-| | Run 1 | Run 2 |
+| | Run 1 | Run 2 (clean rerun) |
 |---|---|---|
-| Scenario (revealed) | | |
-| Estimator the agent chose | | |
-| True effect | | |
-| Average estimate over 300 files | | |
-| Bias | | |
-| RMSE | | |
-| 95% CI coverage | | |
-| Checklist score (0-5) | | |
+| Scenario (revealed) | X: constant effect | Y: effect grows with years since adoption |
+| Estimator the agent chose | Callaway-Sant'Anna, never-treated controls, always-treated dropped | Same method |
+| True effect | -0.1429 | -0.1429 over all treated state-years; -0.1169 over adopters only (what the estimator targets) |
+| Average estimate over 300 files | -0.1458 | -0.1206 |
+| Bias | -0.0029 (-2%) | -0.0038 (-3%) vs adopters-only truth; +0.0223 (+16%) vs the file's true_att |
+| RMSE | 0.0530 | 0.0619 |
+| 95% CI coverage | not measured | not measured |
+| Checklist score (0-5) | 5 (informational: clean scenario) | 5 |
 
+Estimates for all 600 files were computed with the bootstrap switched off (BOOT_B=0), so the point
+estimates are exactly the agents' own; only the SEs were not computed. The agent's bootstrap SE on
+its own Run 2 file was 0.039, while the estimates across the 300 Y files spread with SD 0.058, so
+coverage is probably below 95%. This is a prediction, not a measurement.
 ## PIES classification (counts)
-| Bucket | Count | Examples (transcript line) |
-|---|---|---|
-| P: fabricated or misattributed claims | | |
-| I: neglected essential information | | |
-| E: flawed actions | | |
-| S: ignored restrictions | | |
+| P | 1 | States the standard regression "is wrong for this design" and gives a mechanism, without running a decomposition (final answer, "What I estimated") |
+| I | 2 | No formal pre-trend test or HonestDiD sensitivity check; treats one pre-period blip (+0.10) as evidence while similar-size blips appear at other lags |
+| E | 1 | Headlines -0.17 although its own estimates range from -0.07 to -0.17 (disclosed). Estimand drops the 9 always-treated states, so it differs from the file's true_att by +16% (also disclosed) |
+| S | 0 | The prompts gave no restrictions |
+Run 1 and the first Run 2 (run2_old, contaminated: the agent read Run 1's saved script): add items from those transcripts.
 
 ## What the transcript showed that the output did not
-<fill in>
+The script's output is one line, "estimate,se". It carries none of the following, which only the
+transcript shows: the standard regression gave +0.007 and was discarded; the 9 always-treated
+states were dropped; failed bootstrap draws are skipped silently; the SE rests on 5 control
+states; and the agent recognised the panel as the unilateral-divorce study from its shape alone.
+
+##Disclosures 
+Deviation: one person played Planter, Runner and Auditor. Separation was enforced by separate
+Claude sessions, separate folders and encrypted truth. 
+Run 2 was run twice: the first run read Run 1's saved script, so it was not independent. It is
+kept as run2_old and the clean rerun is the official Run 2.
+Date: 2026-10-02. Model: <as shown in the app>. Template commit: <git log -1 --format=%h>.
 
 ## Contents of this repo
 - `design_sheet.md`: facts about the real design
